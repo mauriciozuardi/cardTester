@@ -1,5 +1,5 @@
 GAME_LIMIT = 5;
-DEBUGGING = true;
+DBUG = true;
 
 gamesRunned = 0;
 startTime = 0;
@@ -27,7 +27,7 @@ function restart(){
 		endTime = new Date();
 		var elapsedTime = endTime.getTime() - startTime.getTime();
 		console.log('+ + + DONE in ' + elapsedTime + 'ms + + +');
-		!DEBUGGING ? rankCards() : null;
+		!DBUG ? rankCards() : null;
 	}
 }
 

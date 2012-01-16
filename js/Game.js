@@ -1,11 +1,9 @@
 function Game(){//cria o player
 	this.players = {};
-	this.players.p1 = new Player('P1');
-	this.players.p2 = new Player('P2');
+	this.players.p1 = new Player('P1',this);
+	this.players.p2 = new Player('P2',this);
 	this.players.p1.opponent = this.players.p2;
 	this.players.p2.opponent = this.players.p1;
-	this.players.p1.game = this;
-	this.players.p2.game = this;
 	this.turnCount = 0;
 	this.turn = this.newTurn();
 	// this.currentPlayer = null;
@@ -13,7 +11,7 @@ function Game(){//cria o player
 
 Game.prototype.newTurn = function(){
 	this.turnCount ++;
-		!DEBUGGING ? null : console.log('– – GAME ' + (gamesRunned + 1) + ' – TURNO ' + this.turnCount + ' – P1:' + this.players.p1.life + '[' + this.players.p1.livingCards() + '] | P2:' + this.players.p2.life + '[' + this.players.p2.livingCards() + '] – –');
+		!DBUG ? null : console.log('– – GAME ' + (gamesRunned + 1) + ' – TURNO ' + this.turnCount + ' – P1:' + this.players.p1.life + '[' + this.players.p1.livingCards() + '] | P2:' + this.players.p2.life + '[' + this.players.p2.livingCards() + '] – –');
 		
 	//roda a roleta e define quem vai atacar
 	for(var i in this.players){
@@ -26,7 +24,7 @@ Game.prototype.newTurn = function(){
 	//avalia o combate
 	for(var i in this.players){
 		var p = this.players[i];
-		!DEBUGGING ? null : console.log([p.name + ' attacker:' + p.attacker.name + ' ' + p.attacker.pow + '/' + p.attacker.sta + ' (' + p.attacker.wait + ')']);
+		!DBUG ? null : console.log([p.name + ' attacker:' + p.attacker.name + ' ' + p.attacker.pow + '/' + p.attacker.sta + ' (' + p.attacker.wait + ')']);
 		this.beforeCombat(p);
 		this.onCombat(p);
 		this.afterCombat(p);
@@ -42,17 +40,17 @@ Game.prototype.newTurn = function(){
 	}
 	
 	//avalia como o jogo deve progredir
-	!DEBUGGING ? null : console.log('.');
+	!DBUG ? null : console.log('.');
 	this.defineNextStep(p);
 }
 
 Game.prototype.onAwake = function(player, card){
 	switch(card.hability){
 		case 'enlist':
-			!DEBUGGING ? null : console.log('> > > ENLIST ('+card.name+' - '+player.name+')');
-			// !DEBUGGING ? null : console.log(player);
+			!DBUG ? null : console.log('> > > ENLIST ('+card.name+' - '+player.name+')');
+			// !DBUG ? null : console.log(player);
 			for(var i in player.hand){
-				!DEBUGGING ? null : console.log(player.hand[i].name + ' [' + player.hand[i].color + ' > ' + card.color +']' );
+				!DBUG ? null : console.log(player.hand[i].name + ' [' + player.hand[i].color + ' > ' + card.color +']' );
 				player.hand[i].color = card.color;
 			}
 		break;
@@ -63,22 +61,34 @@ Game.prototype.onAwake = function(player, card){
 }
 
 Game.prototype.beforeCombat = function(player){
-	
+	switch(player.attacker.hability){
+		case 'renew':
+			!DBUG ? null : console.log('> > > RENEW ('+player.attacker.name+' - '+player.name+')');
+			!DBUG ? null : console.log(player.name + ' recovered ' + player.attacker.n + ' life points.');
+			player.life += player.attacker.n;
+		break;
+		default:
+			//nada
+		break;	
+	}
 }
 
 Game.prototype.onCombat = function(player){
+	//check se foi bloqueada ou não
+	player.opponent.attacker.isDummy ? this.onNoBlock(player) : this.onBlock(player);
+	
+	//confere as outras habilidades
 	switch(player.attacker.hability){
 		case 'heavy':
-			!DEBUGGING ? null : console.log('> > > HEAVY ('+player.attacker.name+' - '+player.name+')');
+			!DBUG ? null : console.log('> > > HEAVY ('+player.attacker.name+' - '+player.name+')');
 			var pow = player.attacker.pow;
 			var oppSta = player.opponent.attacker.sta;
-				// !DEBUGGING ? null : console.log('pow:' + pow);
-				// !DEBUGGING ? null : console.log('oppSta:' + oppSta);
 			if(player.opponent.attacker.player || oppSta > pow){
 				//dano normal
 				player.opponent.attacker.addDmg(player.attacker.pow)
 			} else {
 				//parte na carta, parte no player
+				!DBUG ? null : console.log(player.opponent.name + ' took ' + (pow - oppSta) + ' dmg.');
 				player.opponent.life -= pow - oppSta;
 				player.opponent.attacker.addDmg(oppSta);
 			}
@@ -89,15 +99,56 @@ Game.prototype.onCombat = function(player){
 	}
 }
 
+Game.prototype.onBlock = function(player){
+	switch(player.attacker.hability){
+		case 'slash':
+			!DBUG ? null : console.log('> > > SLASH ('+player.attacker.name+' - '+player.name+')');
+			var targets = player.opponent.ableCards();
+			if(targets.length > 0){
+				var individualDmg = Math.floor(player.attacker.pow/targets.length);
+				individualDmg = (individualDmg >= 1) ? individualDmg : 1;
+				if(DBUG){
+					console.log('Alvos:');
+					for(var i in targets){
+						console.log('> ' + targets[i].name + ' ' + targets[i].pow + '/' + targets[i].sta + '['+targets[i].wait+']');
+					}
+					console.log(individualDmg + ' dmg em cada.');
+				}
+				//causa o dano
+				for(var i in targets){
+					targets[i].addDmg(individualDmg);
+				}
+				//compensa o dano que o combate normal causaria
+				player.opponent.attacker.addDmg(-player.attacker.pow);
+			}
+		break;
+		default:
+			//nada
+		break;	
+	}
+}
+
+Game.prototype.onNoBlock = function(player){
+	
+}
+
+Game.prototype.onKill = function(player,card){
+	!DBUG ? null : console.log(card.name + ' (' + player.name + ') died.');
+}
+
+Game.prototype.onNoKill = function(player,card){
+	!DBUG ? null : console.log(card.name + ' (' + player.name + ') survived.');
+}
+
 Game.prototype.afterCombat = function(player){
 	switch(player.attacker.hability){
 		case 'awake':
-			!DEBUGGING ? null : console.log('> > > AWAKE ('+player.attacker.name+' - '+player.name+')');
+			!DBUG ? null : console.log('> > > AWAKE ('+player.attacker.name+' - '+player.name+')');
 			for(var i in player.hand){
 				player.hand[i].wait --;
-				!DEBUGGING ? null : console.log(player.hand[i].name + ' was afeccted.');
+				!DBUG ? null : console.log(player.hand[i].name + ' was afeccted.');
 				if(player.hand[i].wait <= 0){
-					!DEBUGGING ? null : console.log(player.hand[i].name + ' has awaken.');
+					!DBUG ? null : console.log(player.hand[i].name + ' has awaken.');
 					this.onAwake(player, player.hand[i]);
 				}
 			}
@@ -121,17 +172,17 @@ Game.prototype.defineNextStep = function(){
 	if(this.players.p1.isAlive() && this.players.p2.isAlive()){
 		this.newTurn();
 	} else if(this.players.p1.isAlive() && !this.players.p2.isAlive()){
-		!DEBUGGING ? null : console.log('player1 wins');
+		!DBUG ? null : console.log('player1 wins');
 		updateCardsScores(this.players.p1.deck, 1);
 		updateCardsScores(this.players.p2.deck, -1);
 		restart();
 	} else if(!this.players.p1.isAlive() && this.players.p2.isAlive()){
-		!DEBUGGING ? null : console.log('player2 wins');
+		!DBUG ? null : console.log('player2 wins');
 		updateCardsScores(this.players.p1.deck, -1);
 		updateCardsScores(this.players.p2.deck, 1);
 		restart();
 	} else {
-		!DEBUGGING ? null : console.log('draw');
+		!DBUG ? null : console.log('draw');
 		updateCardsScores(this.players.p1.deck, 0);
 		updateCardsScores(this.players.p2.deck, 0);
 		restart();

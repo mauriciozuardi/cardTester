@@ -1,4 +1,4 @@
-function Card(colorOrDBIndex, i){
+function Card(colorOrDBIndex, i, player, game){
 	if(isNaN(parseInt(colorOrDBIndex))){
 		var options = window[colorOrDBIndex + '_DB'];
 		var index = i ? i : Math.floor(Math.random()*options.length);
@@ -21,6 +21,9 @@ function Card(colorOrDBIndex, i){
 	this.pow  = this.inicialPow;
 	this.sta  = this.inicialSta;
 	this.dmgToTake = 0;
+	this.player = player;
+	this.game = game;
+	this.isDummy = false;
 }
 
 Card.prototype.isAlive = function(){
@@ -47,16 +50,16 @@ Card.prototype.stringify = function(){
 
 Card.prototype.addDmg = function(dmg){
 	this.dmgToTake += dmg;
-	!DEBUGGING ? null : console.log(this.name + ' got ' + dmg + ' dmgToTake. Total:' + this.dmgToTake);
+	!DBUG ? null : console.log(this.name + ' got ' + dmg + ' dmgToTake. Total:' + this.dmgToTake);
 }
 
 Card.prototype.takeDmg = function(){
 	this.sta -= this.dmgToTake;
-	!DEBUGGING ? null : console.log(this.name + ' took ' + this.dmgToTake + ' dmg. Actual sta:' + this.sta);
-	(DEBUGGING && this.sta <= 0) ? console.log(this.name + ' died.') : null;
+	!DBUG ? null : console.log(this.name + ' took ' + this.dmgToTake + ' dmg. Actual sta:' + this.sta);
+	(this.sta <= 0) ? this.player.game.onKill(this.player, this) : this.player.game.onNoKill(this.player, this);
 }
 
-function CardDummy(player){
+function CardDummy(player,game){
 	this.color = "¥";
 	this.inicialWait = 0;
 	this.inicialPow = 0;
@@ -70,14 +73,16 @@ function CardDummy(player){
 	this.sta  = this.inicialSta;
 	this.dmgToTake = 0;
 	this.player = player;
+	this.game = game;
+	this.isDummy = true;
 }
 
 CardDummy.prototype.addDmg = function(dmg){
 	this.dmgToTake += dmg;
-	!DEBUGGING ? null : console.log(this.name + ' got ' + dmg + ' dmgToTake. Total:' + this.dmgToTake);
+	!DBUG ? null : console.log(this.name + ' got ' + dmg + ' dmgToTake. Total:' + this.dmgToTake);
 }
 
 CardDummy.prototype.takeDmg = function(){
 	this.player.life -= this.dmgToTake;
-	!DEBUGGING ? null : console.log(this.player.name + ' took ' + this.dmgToTake + ' dmg. Actual life:' + this.player.life);
+	!DBUG ? null : console.log(this.player.name + ' took ' + this.dmgToTake + ' dmg. Actual life:' + this.player.life);
 }

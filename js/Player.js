@@ -1,8 +1,10 @@
-function Player(name){
-	this.deck = new Deck();
+function Player(name, game){
+	this.deck = new Deck(this, game);
+	this.deck.player = this;
+	this.game = game;
 	this.life = 20;
 	this.name = name;
-	this.dummy = new CardDummy(this);
+	this.dummy = new CardDummy(this,game);
 }
 
 Player.prototype.newHand = function(){
@@ -41,25 +43,39 @@ Player.prototype.applyBonus = function(){
 		contaCores[this.hand[i].color] ++;
 	}
 	//aplica bonus
-	!DEBUGGING ? null : console.log(this.name + ' bonus phase:');
+	!DBUG ? null : console.log(this.name + ' bonus phase:');
 	for(var i in this.hand){
-		var nIguais = contaCores[this.hand[i].color] ? contaCores[this.hand[i].color] : 0; //para o caso de cor ¥
-		//ajusta wait
-		this.hand[i].wait -= nIguais;
-		//ajusta pow/sta
-		if(nIguais == 2){
-			!DEBUGGING ? null : console.log(this.hand[i].name + '(' + this.hand[i].color + ')' + ' -' + nIguais + ' wait and +1/+1');
-			this.hand[i].pow += 1;
-			this.hand[i].sta += 1;
-		} else if(nIguais == 3){
-			!DEBUGGING ? null : console.log(this.hand[i].name + '(' + this.hand[i].color + ')' + ' -' + nIguais + ' wait and +2/+1');
-			this.hand[i].pow += 2;
-			this.hand[i].sta += 1;
-		} else {
-			!DEBUGGING ? null : console.log(this.hand[i].name + '(' + this.hand[i].color + ')' + ' -' + nIguais + ' wait');
+		if(this.hand[i].isAlive()){
+			var nIguais = contaCores[this.hand[i].color] ? contaCores[this.hand[i].color] : 0; //para o caso de cor ¥
+			//ajusta pow/sta
+			if(nIguais == 2){
+				var bP = 1;
+				var bS = 1;
+				var bW = nIguais;
+				!DBUG ? null : console.log(this.hand[i].name + '(' + this.hand[i].color + ')\t' + this.hand[i].pow + '/' + this.hand[i].sta + '[' + this.hand[i].wait + '] > ' + (this.hand[i].pow + bP) + '/' + (this.hand[i].sta + bS) + '[' + (this.hand[i].wait - bW) + ']');
+				this.hand[i].pow += bP;
+				this.hand[i].sta += bS;
+				this.hand[i].wait -= bW;
+			} else if(nIguais == 3){
+				var bP = 2;
+				var bS = 1;
+				var bW = nIguais;
+				!DBUG ? null : console.log(this.hand[i].name + '(' + this.hand[i].color + ')\t' + this.hand[i].pow + '/' + this.hand[i].sta + '[' + this.hand[i].wait + '] > ' + (this.hand[i].pow + bP) + '/' + (this.hand[i].sta + bS) + '[' + (this.hand[i].wait - bW) + ']');
+				this.hand[i].pow += bP;
+				this.hand[i].sta += bS;
+				this.hand[i].wait -= bW;
+			} else {
+				var bP = 0;
+				var bS = 0;
+				var bW = nIguais;
+				!DBUG ? null : console.log(this.hand[i].name + '(' + this.hand[i].color + ')\t' + this.hand[i].pow + '/' + this.hand[i].sta + '[' + this.hand[i].wait + '] > ' + (this.hand[i].pow + bP) + '/' + (this.hand[i].sta + bS) + '[' + (this.hand[i].wait - bW) + ']');
+				this.hand[i].pow += bP;
+				this.hand[i].sta += bS;
+				this.hand[i].wait -= bW;
+			}			
 		}
 	}
-	!DEBUGGING ? null : console.log('.');
+	!DBUG ? null : console.log('.');
 }
 
 Player.prototype.livingCards = function(){
@@ -83,7 +99,12 @@ Player.prototype.whoJustAwoke = function(){
 	}
 }
 
-// Player.prototype.takeDmg = function(dmg){
-// 	this.life -= dmg;
-// 	!DEBUGGING ? null : console.log(this.name + ' took ' + dmg + ' dmg. Actual life:' + this.life);
-// }
+Player.prototype.ableCards = function(){
+	var able = [];
+	for(var i in this.hand){
+		if(this.hand[i].sta > 0 && this.hand[i].wait <= 0){
+			able.push(this.hand[i]);
+		};
+	}
+	return able;
+}

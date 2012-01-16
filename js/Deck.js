@@ -1,4 +1,6 @@
-function Deck(){
+function Deck(player, game){
+	this.player = player;
+	this.game = game;
 	this.pickColors();
 	this.cards = [];
 	this.pickCards();
@@ -19,7 +21,7 @@ Deck.prototype.pickColors = function(){
 Deck.prototype.pickCards = function(){
 	for(var l=0; l<3; l++){
 		for(var c=0; c<3; c++){
-			this.cards.push(new Card(this.colors[c]));		
+			this.cards.push(new Card(this.colors[c],null,this.player,this.game));		
 		}
 	}
 }
