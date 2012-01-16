@@ -53,6 +53,7 @@ Card.prototype.addDmg = function(dmg){
 Card.prototype.takeDmg = function(){
 	this.sta -= this.dmgToTake;
 	!DEBUGGING ? null : console.log(this.name + ' took ' + this.dmgToTake + ' dmg. Actual sta:' + this.sta);
+	(DEBUGGING && this.sta <= 0) ? console.log(this.name + ' died.') : null;
 }
 
 function CardDummy(player){

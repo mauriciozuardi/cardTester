@@ -1,7 +1,7 @@
 function Game(){//cria o player
 	this.players = {};
-	this.players.p1 = new Player('Player1');
-	this.players.p2 = new Player('Player2');
+	this.players.p1 = new Player('P1');
+	this.players.p2 = new Player('P2');
 	this.players.p1.opponent = this.players.p2;
 	this.players.p2.opponent = this.players.p1;
 	this.players.p1.game = this;
@@ -13,18 +13,20 @@ function Game(){//cria o player
 
 Game.prototype.newTurn = function(){
 	this.turnCount ++;
+		!DEBUGGING ? null : console.log('– – GAME ' + (gamesRunned + 1) + ' – TURNO ' + this.turnCount + ' – P1:' + this.players.p1.life + '[' + this.players.p1.livingCards() + '] | P2:' + this.players.p2.life + '[' + this.players.p2.livingCards() + '] – –');
+		
 	//roda a roleta e define quem vai atacar
 	for(var i in this.players){
 		var p = this.players[i];
 		p.newHand();
 		p.setAttacker();
+		p.whoJustAwoke();
 	}
-	!DEBUGGING ? null : console.log('– – GAME ' + (gamesRunned + 1) + ' – TURNO ' + this.turnCount + ' (' + this.players.p1.life + '/' + this.players.p1.livingCards() + ' : ' + this.players.p2.life + '/' + this.players.p2.livingCards() + ') – –');
 	
 	//avalia o combate
 	for(var i in this.players){
 		var p = this.players[i];
-		!DEBUGGING ? null : console.log([p.name + ' attacker:',p.attacker]);
+		!DEBUGGING ? null : console.log([p.name + ' attacker:' + p.attacker.name + ' ' + p.attacker.pow + '/' + p.attacker.sta + ' (' + p.attacker.wait + ')']);
 		this.beforeCombat(p);
 		this.onCombat(p);
 		this.afterCombat(p);
@@ -47,11 +49,11 @@ Game.prototype.newTurn = function(){
 Game.prototype.onAwake = function(player, card){
 	switch(card.hability){
 		case 'enlist':
-			!DEBUGGING ? null : console.log('> > > ENLIST');
-			!DEBUGGING ? null : console.log(player);	
+			!DEBUGGING ? null : console.log('> > > ENLIST ('+card.name+' - '+player.name+')');
+			// !DEBUGGING ? null : console.log(player);
 			for(var i in player.hand){
-				player.hand[i].color = player.attacker.color;
-				!DEBUGGING ? null : console.log(player.opponent.hand[i]);
+				!DEBUGGING ? null : console.log(player.hand[i].name + ' [' + player.hand[i].color + ' > ' + card.color +']' );
+				player.hand[i].color = card.color;
 			}
 		break;
 		default:
@@ -67,11 +69,11 @@ Game.prototype.beforeCombat = function(player){
 Game.prototype.onCombat = function(player){
 	switch(player.attacker.hability){
 		case 'heavy':
-			// !DEBUGGING ? null : console.log('> > > HEAVY');
+			!DEBUGGING ? null : console.log('> > > HEAVY ('+player.attacker.name+' - '+player.name+')');
 			var pow = player.attacker.pow;
-			var oppSta = player.opponent.attacker.sta;			// 
-						// !DEBUGGING ? null : console.log('pow:' + pow);
-						// !DEBUGGING ? null : console.log('oppSta:' + oppSta);
+			var oppSta = player.opponent.attacker.sta;
+				// !DEBUGGING ? null : console.log('pow:' + pow);
+				// !DEBUGGING ? null : console.log('oppSta:' + oppSta);
 			if(player.opponent.attacker.player || oppSta > pow){
 				//dano normal
 				player.opponent.attacker.addDmg(player.attacker.pow)
@@ -90,8 +92,7 @@ Game.prototype.onCombat = function(player){
 Game.prototype.afterCombat = function(player){
 	switch(player.attacker.hability){
 		case 'awake':
-			!DEBUGGING ? null : console.log('> > > AWAKE');	
-			// !DEBUGGING ? null : console.log([player.name, player.hand]);
+			!DEBUGGING ? null : console.log('> > > AWAKE ('+player.attacker.name+' - '+player.name+')');
 			for(var i in player.hand){
 				player.hand[i].wait --;
 				!DEBUGGING ? null : console.log(player.hand[i].name + ' was afeccted.');

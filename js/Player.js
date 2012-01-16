@@ -41,22 +41,25 @@ Player.prototype.applyBonus = function(){
 		contaCores[this.hand[i].color] ++;
 	}
 	//aplica bonus
+	!DEBUGGING ? null : console.log(this.name + ' bonus phase:');
 	for(var i in this.hand){
-		var nIguais = contaCores[this.hand[i].color];
+		var nIguais = contaCores[this.hand[i].color] ? contaCores[this.hand[i].color] : 0; //para o caso de cor ¥
 		//ajusta wait
 		this.hand[i].wait -= nIguais;
 		//ajusta pow/sta
 		if(nIguais == 2){
+			!DEBUGGING ? null : console.log(this.hand[i].name + '(' + this.hand[i].color + ')' + ' -' + nIguais + ' wait and +1/+1');
 			this.hand[i].pow += 1;
 			this.hand[i].sta += 1;
-		}
-		if(nIguais == 3){
+		} else if(nIguais == 3){
+			!DEBUGGING ? null : console.log(this.hand[i].name + '(' + this.hand[i].color + ')' + ' -' + nIguais + ' wait and +2/+1');
 			this.hand[i].pow += 2;
 			this.hand[i].sta += 1;
+		} else {
+			!DEBUGGING ? null : console.log(this.hand[i].name + '(' + this.hand[i].color + ')' + ' -' + nIguais + ' wait');
 		}
-		//dispara awake se necessário
-		(this.hand[i].wait <= 0) ? this.game.onAwake(this, this.hand[i]) : null;
 	}
+	!DEBUGGING ? null : console.log('.');
 }
 
 Player.prototype.livingCards = function(){
@@ -71,6 +74,13 @@ Player.prototype.livingCards = function(){
 
 Player.prototype.isAlive = function(){
 	return (this.life > 0 && this.livingCards() > 0) ? true : false;
+}
+
+Player.prototype.whoJustAwoke = function(){
+	for(var i in this.hand){
+		//dispara awake se necessário
+		(this.hand[i].wait <= 0) ? this.game.onAwake(this, this.hand[i]) : null;
+	}
 }
 
 // Player.prototype.takeDmg = function(dmg){
