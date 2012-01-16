@@ -1,4 +1,4 @@
-GAME_LIMIT = 100000;
+GAME_LIMIT = 1234;
 DBUG = false;
 
 gamesRunned = 0;
@@ -60,7 +60,21 @@ function rankCards(){
 		totalFights += cards_scores[i].lutas;
 		console.log(roundedPPL(cards_scores[i]) + '\t:  ' + cards_scores[i].card);
 	}
-	console.log('\t>  ' + gamesRunned + ' games runned. Aprox.: ' + Math.round(totalFights/i) + ' fights/card.');
+	console.log('\t>  ' + pontuaInt(gamesRunned) + ' games runned. Aprox.: ' + Math.round(totalFights/i) + ' fights/card.');
+}
+
+function pontuaInt(n){
+	var str = n.toString();
+	var newstr = "";
+	for(var i in str){
+		var j = str.length -1 - i;
+		newstr += str.substr(i,1);
+		if(j % 3 == 0){
+			newstr += '.';
+		}
+	}
+	newstr = newstr.substr(0,newstr.length-1); //capa o último '.'
+	return newstr;
 }
 
 function roundedPPL(cardScore){
