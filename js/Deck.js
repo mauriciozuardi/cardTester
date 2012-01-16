@@ -25,3 +25,17 @@ Deck.prototype.pickCards = function(){
 		}
 	}
 }
+
+Deck.prototype.stringify = function(){
+	var str = "";
+	var arr = [];
+	for(var i in this.cards){
+		arr.push(this.cards[i].id);
+	}
+	arr = arr.sort(naturalSort);
+	for(var i in arr){
+		str += arr[i] + "-";
+	}
+	str = str.substr(0,str.length-1);
+	return str;
+}

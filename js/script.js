@@ -1,10 +1,13 @@
-GAME_LIMIT = 1234;
+GAME_LIMIT = 1000000;
+STORE_DECKS = true;
 DBUG = false;
 
 gamesRunned = 0;
 startTime = 0;
 endTime = 0;
 cards_scores = [];
+decks_scores = {};
+sorted_decks = [];
 
 function init(){
 	if(gamesRunned == 0){
@@ -34,6 +37,7 @@ function restart(){
 		}
 		console.log('+ + + DONE in ' + strTime + ' + + +');
 		!DBUG ? rankCards() : null;
+		!DBUG && STORE_DECKS ? rankDecks() : null;
 	}
 }
 
@@ -42,12 +46,13 @@ function updateCardsScores(deck, points){
 		cards_scores[deck.cards[i].id].lutas ++;
 		cards_scores[deck.cards[i].id].pontos += points;
 	}
+	STORE_DECKS ? upsertDeck(deck, points) : null;
 }
 
-function initScores(){
+function initCardScores(){
 	for(var i in ALL_CARDS){
 		cards_scores[i] = {};
-		cards_scores[i].card = ALL_CARDS[i];
+		cards_scores[i].card = encapsulaCor(ALL_CARDS[i]);
 		cards_scores[i].lutas = 0;
 		cards_scores[i].pontos = 0;
 	}
@@ -55,12 +60,62 @@ function initScores(){
 
 function rankCards(){
 	var totalFights = 0;
+	var outputCSV = "card\tppl\n";
 	cards_scores.sort(comparePPL);
 	for(var i in cards_scores){
 		totalFights += cards_scores[i].lutas;
-		console.log(roundedPPL(cards_scores[i]) + '\t:  ' + cards_scores[i].card);
+		// console.log(roundedPPL(cards_scores[i]) + '\t:  ' + cards_scores[i].card);
+		outputCSV += cards_scores[i].card + "\t" + roundedPPL(cards_scores[i]) + "\n";
 	}
-	console.log('\t>  ' + pontuaInt(gamesRunned) + ' games runned. Aprox.: ' + Math.round(totalFights/i) + ' fights/card.');
+	console.log(pontuaInt(gamesRunned) + ' games runned. Aprox.: ' + Math.round(totalFights/i) + ' fights/card.');
+	console.log(outputCSV);
+}
+
+function upsertDeck(deck, points){
+	var d = deck.stringify();	
+	if(decks_scores[d]){
+		decks_scores[d].lutas ++;
+		decks_scores[d].pontos += points;
+	} else {
+		decks_scores[d] = {};
+		decks_scores[d].lutas = 1;
+		decks_scores[d].pontos = points;
+	}
+}
+
+function rankDecks(){
+	startTime = new Date();
+	//coloca re-empacota os decks dentro de um array
+	for(var i in decks_scores){
+		var newObj = {}
+		newObj.deck = i;
+		newObj.lutas = decks_scores[i].lutas;
+		newObj.pontos = decks_scores[i].pontos;
+		sorted_decks.push(newObj);
+	}
+	
+	//ordena
+	sorted_decks.sort(comparePPL);
+	
+	//mostra
+	var SHOW_MAX = 10;
+	var n = (sorted_decks.length > SHOW_MAX) ? SHOW_MAX : sorted_decks.length;
+	console.log('-');
+	console.log(pontuaInt(sorted_decks.length) + ' decks armazenados');
+	for(var i=0; i<n; i++){
+		console.log(sorted_decks[i].deck + '\t: ' + roundedPPL(sorted_decks[i])/100);
+	}
+	
+	//fala qto demorou
+	endTime = new Date();
+	var elapsedTime = endTime.getTime() - startTime.getTime();
+	var strTime = "";
+	if(elapsedTime > 1000){
+		strTime = Math.round(elapsedTime/10)/100 + 's';
+	} else {
+		strTime = elapsedTime + 'ms';
+	}
+	console.log('SORTED in ' + strTime);
 }
 
 function pontuaInt(n){
@@ -74,6 +129,12 @@ function pontuaInt(n){
 		}
 	}
 	newstr = newstr.substr(0,newstr.length-1); //capa o último '.'
+	return newstr;
+}
+
+function encapsulaCor(str){
+	//assume que cor tem sempre uma letra
+	var newstr = str.substr(0,1) + "|" + str.substr(2,str.length - 1);
 	return newstr;
 }
 
@@ -92,5 +153,5 @@ function comparePPL(a,b){
 	return pplB - pplA;
 }
 
-initScores();
+initCardScores();
 $(init);

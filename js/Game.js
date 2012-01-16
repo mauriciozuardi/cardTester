@@ -6,7 +6,6 @@ function Game(){//cria o player
 	this.players.p2.opponent = this.players.p1;
 	this.turnCount = 0;
 	this.turn = this.newTurn();
-	// this.currentPlayer = null;
 }
 
 Game.prototype.newTurn = function(){
