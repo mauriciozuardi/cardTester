@@ -67,6 +67,11 @@ Game.prototype.beforeCombat = function(player){
 			!DBUG ? null : console.log(player.name + ' recovered ' + player.attacker.n + ' life points.');
 			player.life += player.attacker.n;
 		break;
+		case 'harden':
+			!DBUG ? null : console.log('> > > HARDEN ('+player.attacker.name+' - '+player.name+')');
+			player.attacker.sta += player.attacker.n;
+			!DBUG ? null : console.log(player.attacker.name + ' is now ' + player.attacker.pow + '/' + player.attacker.sta);
+		break;
 		default:
 			//nada
 		break;	
