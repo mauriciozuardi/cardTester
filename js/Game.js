@@ -132,8 +132,20 @@ Game.prototype.onNoBlock = function(player){
 	
 }
 
-Game.prototype.onKill = function(player,card){
+Game.prototype.onKill = function(player, card){
 	!DBUG ? null : console.log(card.name + ' (' + player.name + ') died.');
+	switch(card.hability){
+		case 'immortal':
+			!DBUG ? null : console.log('> > > IMMORTAL ('+card.name+' - '+player.name+')');
+			card.wait = card.inicialWait;
+			card.pow = card.inicialPow;
+			card.sta = card.inicialSta;
+			!DBUG ? null : console.log(card.name + ' is BACK! ' + card.pow + '/' + card.sta + '['+card.wait+']');
+		break;
+		default:
+			//nada
+		break;	
+	}
 }
 
 Game.prototype.onNoKill = function(player,card){
