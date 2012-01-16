@@ -54,6 +54,8 @@ Player.prototype.applyBonus = function(){
 			this.hand[i].pow += 2;
 			this.hand[i].sta += 1;
 		}
+		//dispara awake se necessário
+		(this.hand[i].wait <= 0) ? this.game.onAwake(this, this.hand[i]) : null;
 	}
 }
 
@@ -70,3 +72,8 @@ Player.prototype.livingCards = function(){
 Player.prototype.isAlive = function(){
 	return (this.life > 0 && this.livingCards() > 0) ? true : false;
 }
+
+// Player.prototype.takeDmg = function(dmg){
+// 	this.life -= dmg;
+// 	!DEBUGGING ? null : console.log(this.name + ' took ' + dmg + ' dmg. Actual life:' + this.life);
+// }

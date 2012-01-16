@@ -1,4 +1,4 @@
-GAME_LIMIT = 1;
+GAME_LIMIT = 5;
 DEBUGGING = true;
 
 gamesRunned = 0;
@@ -17,12 +17,17 @@ function restart(){
 	gamesRunned ++;
 	if(gamesRunned < GAME_LIMIT){
 		game = null;
-		init();
+		//descansa a cada 100 runs
+		if (gamesRunned % 250 == 0){
+			setTimeout(init, 0);
+		}else{
+			init();
+		}
 	} else {
 		endTime = new Date();
 		var elapsedTime = endTime.getTime() - startTime.getTime();
 		console.log('+ + + DONE in ' + elapsedTime + 'ms + + +');
-		rankCards();
+		!DEBUGGING ? rankCards() : null;
 	}
 }
 

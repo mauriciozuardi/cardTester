@@ -20,6 +20,7 @@ function Card(colorOrDBIndex, i){
 	this.wait = this.inicialWait;
 	this.pow  = this.inicialPow;
 	this.sta  = this.inicialSta;
+	this.dmgToTake = 0;
 }
 
 Card.prototype.isAlive = function(){
@@ -44,9 +45,14 @@ Card.prototype.stringify = function(){
 	return str;
 }
 
-Card.prototype.takeDmg = function(dmg){
-	this.sta -= dmg;
-	!DEBUGGING ? null : console.log(this.name + ' took ' + dmg + ' dmg. Actual sta:' + this.sta);
+Card.prototype.addDmg = function(dmg){
+	this.dmgToTake += dmg;
+	!DEBUGGING ? null : console.log(this.name + ' got ' + dmg + ' dmgToTake. Total:' + this.dmgToTake);
+}
+
+Card.prototype.takeDmg = function(){
+	this.sta -= this.dmgToTake;
+	!DEBUGGING ? null : console.log(this.name + ' took ' + this.dmgToTake + ' dmg. Actual sta:' + this.sta);
 }
 
 function CardDummy(player){
@@ -61,10 +67,16 @@ function CardDummy(player){
 	this.wait = this.inicialWait;
 	this.pow  = this.inicialPow;
 	this.sta  = this.inicialSta;
+	this.dmgToTake = 0;
 	this.player = player;
 }
 
-CardDummy.prototype.takeDmg = function(dmg){
-	this.player.life -= dmg;
-	!DEBUGGING ? null : console.log(this.player.name + ' took ' + dmg + ' dmg. Actual life:' + this.player.life);
+CardDummy.prototype.addDmg = function(dmg){
+	this.dmgToTake += dmg;
+	!DEBUGGING ? null : console.log(this.name + ' got ' + dmg + ' dmgToTake. Total:' + this.dmgToTake);
+}
+
+CardDummy.prototype.takeDmg = function(){
+	this.player.life -= this.dmgToTake;
+	!DEBUGGING ? null : console.log(this.player.name + ' took ' + this.dmgToTake + ' dmg. Actual life:' + this.player.life);
 }
