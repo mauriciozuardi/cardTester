@@ -56,7 +56,7 @@ Card.prototype.addDmg = function(dmg){
 Card.prototype.takeDmg = function(){
 	this.sta -= this.dmgToTake;
 	!DBUG ? null : console.log(this.name + ' took ' + this.dmgToTake + ' dmg. Actual sta:' + this.sta);
-	(this.sta <= 0) ? this.player.game.onKill(this.player, this) : this.player.game.onNoKill(this.player, this);
+	(this.sta <= 0) ? this.player.game.onDeath(this.player, this) : this.player.game.onNoDeath(this.player, this);
 }
 
 function CardDummy(player,game){

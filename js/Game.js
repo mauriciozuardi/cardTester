@@ -63,12 +63,12 @@ Game.prototype.onAwake = function(player, card){
 Game.prototype.beforeCombat = function(player){
 	switch(player.attacker.hability){
 		case 'renew':
-			!DBUG ? null : console.log('> > > RENEW ('+player.attacker.name+' - '+player.name+')');
+			!DBUG ? null : console.log('> > > RENEW '+player.attacker.n+' ('+player.attacker.name+' - '+player.name+')');
 			!DBUG ? null : console.log(player.name + ' recovered ' + player.attacker.n + ' life points.');
 			player.life += player.attacker.n;
 		break;
 		case 'harden':
-			!DBUG ? null : console.log('> > > HARDEN ('+player.attacker.name+' - '+player.name+')');
+			!DBUG ? null : console.log('> > > HARDEN '+player.attacker.n+' ('+player.attacker.name+' - '+player.name+')');
 			player.attacker.sta += player.attacker.n;
 			!DBUG ? null : console.log(player.attacker.name + ' is now ' + player.attacker.pow + '/' + player.attacker.sta);
 		break;
@@ -147,7 +147,7 @@ Game.prototype.onNoBlock = function(player){
 	
 }
 
-Game.prototype.onKill = function(player, card){
+Game.prototype.onDeath = function(player, card){
 	!DBUG ? null : console.log(card.name + ' (' + player.name + ') died.');
 	switch(card.hability){
 		case 'immortal':
@@ -157,13 +157,27 @@ Game.prototype.onKill = function(player, card){
 			card.sta = card.inicialSta;
 			!DBUG ? null : console.log(card.name + ' is BACK! ' + card.pow + '/' + card.sta + '['+card.wait+']');
 		break;
+		case 'martyr':
+			!DBUG ? null : console.log('> > > MARTYR ' + card.n + ' ('+card.name+' - '+player.name+')');
+			for(var i in player.hand){
+				if(player.hand[i].isAlive()){
+					player.hand[i].pow += card.n;
+					player.hand[i].sta += card.n;
+					!DBUG ? null : console.log(player.hand[i].name + ' upgraded to ' + player.hand[i].pow + '/' + player.hand[i].sta);
+				} else if(player.hand[i] != card){
+					player.hand[i].pow = card.n;
+					player.hand[i].sta = card.n;
+					!DBUG ? null : console.log(player.hand[i].name + ' is BACK! Stats: ' + player.hand[i].pow + '/' + player.hand[i].sta);
+				}
+			}
+		break;
 		default:
 			//nada
 		break;	
 	}
 }
 
-Game.prototype.onNoKill = function(player,card){
+Game.prototype.onNoDeath = function(player,card){
 	!DBUG ? null : console.log(card.name + ' (' + player.name + ') survived.');
 }
 
@@ -214,8 +228,4 @@ Game.prototype.defineNextStep = function(){
 		updateCardsScores(this.players.p2.deck, 0);
 		restart();
 	}
-}
-
-Game.prototype.onGameOver = function(player){
-	
 }

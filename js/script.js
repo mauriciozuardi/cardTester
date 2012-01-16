@@ -1,5 +1,5 @@
-GAME_LIMIT = 5;
-DBUG = true;
+GAME_LIMIT = 100000;
+DBUG = false;
 
 gamesRunned = 0;
 startTime = 0;
@@ -18,7 +18,7 @@ function restart(){
 	if(gamesRunned < GAME_LIMIT){
 		game = null;
 		//descansa a cada 100 runs
-		if (gamesRunned % 250 == 0){
+		if (gamesRunned % 100 == 0){
 			setTimeout(init, 0);
 		}else{
 			init();
@@ -26,7 +26,13 @@ function restart(){
 	} else {
 		endTime = new Date();
 		var elapsedTime = endTime.getTime() - startTime.getTime();
-		console.log('+ + + DONE in ' + elapsedTime + 'ms + + +');
+		var strTime = "";
+		if(elapsedTime > 1000){
+			strTime = Math.round(elapsedTime/10)/100 + 's';
+		} else {
+			strTime = elapsedTime + 'ms';
+		}
+		console.log('+ + + DONE in ' + strTime + ' + + +');
 		!DBUG ? rankCards() : null;
 	}
 }
