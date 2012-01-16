@@ -98,6 +98,16 @@ Game.prototype.onCombat = function(player){
 				player.opponent.attacker.addDmg(oppSta);
 			}
 		break;
+		case 'purge':
+			!DBUG ? null : console.log('> > > PURGE ('+player.attacker.name+' - '+player.name+')');
+			if(!player.opponent.attacker.isDummy && player.opponent.attacker.pow > player.attacker.pow){
+				!DBUG ? null : console.log('MORRA! ' + player.opponent.attacker.name + ' will take ' + player.opponent.attacker.sta + ' dmg.');
+				player.opponent.attacker.addDmg(player.opponent.attacker.sta);
+			} else{
+				!DBUG ? null : console.log('Dano normal. ' + player.opponent.attacker.name + ' will take ' + player.attacker.pow + ' dmg.');
+				player.opponent.attacker.addDmg(player.attacker.pow);
+			}
+		break;
 		default:
 			player.opponent.attacker.addDmg(player.attacker.pow);
 		break;	
