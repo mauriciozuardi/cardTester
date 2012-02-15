@@ -1,4 +1,4 @@
-GAME_LIMIT = 1000000;
+GAME_LIMIT = 10000;
 STORE_DECKS = true;
 DBUG = false;
 
@@ -98,12 +98,18 @@ function rankDecks(){
 	sorted_decks.sort(comparePPL);
 	
 	//mostra
-	var SHOW_MAX = 10;
+	var SHOW_MAX = 100;
 	var n = (sorted_decks.length > SHOW_MAX) ? SHOW_MAX : sorted_decks.length;
+	var shown = 0;
 	console.log('-');
 	console.log(pontuaInt(sorted_decks.length) + ' decks armazenados');
-	for(var i=0; i<n; i++){
-		console.log(sorted_decks[i].deck + '\t: ' + roundedPPL(sorted_decks[i])/100);
+	for(var i in sorted_decks){
+		if(sorted_decks[i].lutas > 1){
+			console.log(sorted_decks[i]);
+			// console.log(sorted_decks[i].deck + '\t: ' + roundedPPL(sorted_decks[i])/100);
+			shown ++;
+			if(shown > SHOW_MAX) { break }
+		}
 	}
 	
 	//fala qto demorou

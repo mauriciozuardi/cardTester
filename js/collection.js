@@ -47,3 +47,29 @@ for (var i in DECK_COLORS){
 		ALL_CARDS.push(arr[j]);
 	}
 }
+
+function combinacoes(){
+	//retorna o total de decks possíveis, desconsiderando variações de posição dentro do deck, somente a quantidade de cartas de cada tipo
+	//a lógica usada é a de que dentro de cada bloco de cor, temos 3 • que podem junto com os 4 separadores , formar qualquer sequencia dentro dos []
+	//ex1: [•,,,••,] isso é equivalente a 0-3-3 quando listamos os index
+	//ex2: [•,•,•,,] isso é equivalente a 0-1-2 ..
+	//de acordo com o site http://mathforum.org/library/drmath/view/56115.html a fórmula é (n• + n,)!/n•!*n,!
+	//como temos 3 cores, multiplicamos os resultados e temos o total
+	var r = R_DB.length - 1; // numero de separações vermelhas (n cartas vermelhas -1)
+	var g = G_DB.length - 1; // idem para verdes
+	var b = B_DB.length - 1; // idem para azuis
+	var p = 3; //n•
+	return (fatorial(p+r)/(fatorial(p)*fatorial(r)))*(fatorial(p+g)/(fatorial(p)*fatorial(g)))*(fatorial(p+b)/(fatorial(p)*fatorial(b)));
+}
+
+function fatorial(n){
+	//adaptada de: http://www.codigofonte.net/scripts/javascript/calculadora/1641_fatorial-de-um-numero
+  var fatorial = 1;
+	n = n > 100 ? n = 0 : n; //medida de segurança
+  for (i = 1; i <= n; i++) {
+    fatorial *= i;
+  }
+	return fatorial;
+}
+
+console.log(combinacoes());
