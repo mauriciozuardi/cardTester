@@ -5,6 +5,12 @@ function Player(name, game){
 	this.life = 20;
 	this.name = name;
 	this.dummy = new CardDummy(this,game);
+	
+	this.manaR = 0;
+	this.manaG = 0;
+	this.manaB = 0;
+	this.manaA = 0;
+	this.mana_ = 0;
 }
 
 Player.prototype.newHand = function(){
